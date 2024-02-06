@@ -1,4 +1,7 @@
 ﻿@page "/counter"
+@inject NavigationManager _nav
+@inject NotificationService NotificationService
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
 
 <PageTitle>Counter</PageTitle>
 
@@ -10,6 +13,26 @@
 
 @code {
     private int currentCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var uri = new Uri(_nav.Uri);
+
+        // Obtient le fragment de l'URL
+        var fragment = uri.Fragment;
+
+        // Extrayez le fragment sans le caractère '#'
+        var fragmentWithoutHash = fragment.TrimStart('#');
+
+        // Analysez les paramètres du fragment
+        var queryParams = System.Web.HttpUtility.ParseQueryString(fragmentWithoutHash);
+
+        // Obtenez la valeur de l'id_token
+        var idToken = queryParams["id_token"];
+
+        await localStorage.SetItemAsStringAsync("idToken", idToken);
+    }
 
     private void IncrementCount()
     {
