@@ -12,9 +12,11 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
+@Token
+
 @code {
     private int currentCount = 0;
-
+    string? Token { get; set; }
     [Inject] public IAuthenticationService authService { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -26,6 +28,7 @@
 
         string idToken = await authService.GetIdToken(code);
 
+        Token = idToken;
         await localStorage.SetItemAsStringAsync("idToken", idToken);
     }
 
