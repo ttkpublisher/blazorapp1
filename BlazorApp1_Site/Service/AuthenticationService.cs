@@ -6,6 +6,7 @@ using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using BlazorApp1_Site.Models;
+using Newtonsoft.Json;
 
 namespace BlazorApp1_Site.Service
 {
@@ -42,5 +43,55 @@ namespace BlazorApp1_Site.Service
 
             return authenticateResult;
         }
+
+        public async Task<string> GetIdToken(string code)
+        {
+            try
+            {
+                string apiUrl = "https://ttkapidomain.auth.eu-west-3.amazoncognito.com/oauth2/token";
+
+                var parameters = new Dictionary<string, string>
+                {
+                    { "grant_type", "authorization_code" },
+                    { "client_id", "6f4m403a7ocbfa16275rpqn7d4" },
+                    { "code", code },
+                    { "redirect_uri", "https://blazorapp1.teletech-int.info/counter" }
+                };
+
+                // Créer le contenu form-url-encoded
+                var content = new FormUrlEncodedContent(parameters);
+
+                // Spécifier le Content-Type
+                content.Headers.Clear();
+                content.Headers.Add("Content-Type", "application/x-www-form-urlencoded");
+
+                // Envoyer la requête POST
+                HttpResponseMessage response = await httpClient.PostAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    TokenResponse tokenResponse = JsonConvert.DeserializeObject<TokenResponse>(responseBody);
+                    return tokenResponse.id_token;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+    }
+
+    public class TokenResponse
+    {
+        public string id_token { get; set; }
+        public string access_token { get; set; }
+        public string refresh_token { get; set; }
+        public string token_type { get; set; }
+        public int expires_in { get; set; }
     }
 }
