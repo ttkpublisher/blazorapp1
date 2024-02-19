@@ -11,14 +11,38 @@
 @code {
     [Inject] public IAuthenticationService authService { get; set; }
 
+    string? Token { get; set; }
     private string? username;
     private string? password;
     bool busy;
 
     protected override async void OnInitialized()
     {
-        this._nav.NavigateTo("https://ttkapidomain.auth.eu-west-3.amazoncognito.com/login?client_id=6f4m403a7ocbfa16275rpqn7d4&response_type=code&scope=email+openid+phone+ttkapiresourceserver%2Fmainscope&redirect_uri=https%3A%2F%2Fblazorapp1.teletech-int.info%2Fcounter", true);
+        var queryString = _nav.ToAbsoluteUri(_nav.Uri).Query;
 
+
+        if (!string.IsNullOrEmpty(queryString) && queryString.Contains("code"))
+        {
+            var uri = new Uri(_nav.Uri);
+
+            string query = uri.Query.TrimStart('?');
+            string code = System.Web.HttpUtility.ParseQueryString(query).Get("code");
+
+            string idToken = await authService.GetIdToken(code);
+
+            Token = idToken;
+            await localStorage.SetItemAsStringAsync("idToken", idToken);
+
+            // Supprimer le paramètre "code" de l'URL
+            _nav.NavigateTo("weather", forceLoad: true);
+        }
+        else
+        {
+            //_nav.NavigateTo("https://ttkapidomain.auth.eu-west-3.amazoncognito.com/login?client_id=6f4m403a7ocbfa16275rpqn7d4&response_type=code&scope=email+openid+phone+ttkapiresourceserver%2Fmainscope&redirect_uri=https%3A%2F%2Flocalhost%3A7149%2Flogin", true);
+            //_nav.NavigateTo("https://ttkapidomain.auth.eu-west-3.amazoncognito.com/login?client_id=6f4m403a7ocbfa16275rpqn7d4&response_type=code&scope=email+openid+phone+ttkapiresourceserver%2Fmainscope&redirect_uri=https%3A%2F%2Flocalhost%3A7149%2Fweather", true);
+            _nav.NavigateTo("https://ttkapidomain.auth.eu-west-3.amazoncognito.com/login?client_id=6f4m403a7ocbfa16275rpqn7d4&response_type=code&scope=email+openid+phone+ttkapiresourceserver%2Fmainscope&redirect_uri=https%3A%2F%2Fblazorapp1.teletech-int.info%2Flogin", true);
+            //_nav.NavigateTo("https://ttkapidomain.auth.eu-west-3.amazoncognito.com/login?client_id=6f4m403a7ocbfa16275rpqn7d4&response_type=code&scope=email+openid+phone+ttkapiresourceserver%2Fmainscope&redirect_uri=https%3A%2F%2Fblazorapp1.teletech-int.info%2Fcounter", true);
+        }
     }
 
     private async void Validate()

@@ -55,7 +55,7 @@ namespace BlazorApp1_Site.Service
                     { "grant_type", "authorization_code" },
                     { "client_id", "6f4m403a7ocbfa16275rpqn7d4" },
                     { "code", code },
-                    { "redirect_uri", "https://blazorapp1.teletech-int.info/counter" }
+                    { "redirect_uri", "https://blazorapp1.teletech-int.info/login" }
                 };
 
                 // Créer le contenu form-url-encoded

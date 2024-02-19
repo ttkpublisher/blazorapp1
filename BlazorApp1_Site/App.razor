@@ -1,4 +1,8 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@inject NavigationManager _nav
+@inject NotificationService NotificationService
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -10,3 +14,20 @@
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    private async Task CheckToken(NavigationContext context)
+    {
+        // Vérifiez le token lors de chaque changement de page
+        if (String.IsNullOrEmpty(await localStorage.GetItemAsStringAsync("idToken")) && !_nav.ToAbsoluteUri(_nav.Uri).AbsoluteUri.Contains("login"))
+        {
+            ShowNotification(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Erreur", Detail = "Vous avez été déconnecté", Duration = 5000 });
+            _nav.NavigateTo("login");
+        }
+    }
+
+    void ShowNotification(NotificationMessage message)
+    {
+        NotificationService.Notify(message);
+    }
+}
