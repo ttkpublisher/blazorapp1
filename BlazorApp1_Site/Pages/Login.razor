@@ -34,7 +34,7 @@
             await localStorage.SetItemAsStringAsync("idToken", idToken);
 
             // Supprimer le paramètre "code" de l'URL
-            _nav.NavigateTo("weather", forceLoad: true);
+            _nav.NavigateTo("counter", forceLoad: true);
         }
         else
         {
